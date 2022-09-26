@@ -1,0 +1,61 @@
+type User @model {
+  id: ID!
+  name: String
+  email: String @unique
+  emailVerified: DateTime
+  image: String
+  accounts: [Account]!
+  sessions: [Session]!
+  projects: [ProjectUser]!
+}
+
+type Account {
+  id: ID!
+  type: String!
+  provider: String!
+  providerAccountId: String! # TODO @unique(scope: ["provider"])
+  refreshToken: String
+  accessToken: String
+  expiresAt: Int
+  tokenType: String
+  scope: String
+  idToken: String
+  sessionState: String
+  user: User! # TODO cascading deletes
+}
+
+type Session {
+  id: ID!
+  sessionToken: String! @unique
+  expires: DateTime!
+  user: User! # TODO cascading deletes
+}
+
+type VerificationToken {
+  id: ID!
+  identifier: String!
+  token: String! @unique # TODO @unique(scope: ["identifier"])
+  expires: DateTime!
+}
+
+type Project {
+  id: ID!
+  name: String!
+  slug: String! @unique
+  domain: String! @unique
+  domainVerified: String! # TODO @default(false)
+  plan: String! # TODO @default("free")
+  usageLimit: Int! # TODO @default(1000)
+  stripeId: String @unique
+  lastBilled: DateTime
+  # TODO updatedAt/createdAt timestamps
+  users: [ProjectUser]
+}
+
+type ProjectUser @model {
+  id: ID!
+  role: String! # TODO @default("member")
+  # TODO updatedAt/createdAt timestamps
+  user: User! # TODO cascading deletes
+  project: Project! # TODO @unique(scope: ["user"]) and cascading deletes
+}
